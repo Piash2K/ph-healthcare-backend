@@ -8,6 +8,20 @@ const createSpecialty = async (payload: Specialty) => {
   return specialty;
 };
 
+const getAllSpecialties = async () => {
+  const result = await prisma.specialty.findMany();
+  return result;
+};
+
+const deleteSpecialty = async (id: string) =>{
+    const result = await prisma.specialty.delete({
+        where:{id}
+    })
+    return result
+}
+
 export const SpecialtyService = {
   createSpecialty,
+  getAllSpecialties,
+  deleteSpecialty
 };

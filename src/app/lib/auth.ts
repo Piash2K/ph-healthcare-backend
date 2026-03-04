@@ -38,6 +38,10 @@ export const auth = betterAuth({
         required: false,
         defaultValue: null,
       },
-    }
+    },
   },
+//   trustedOrigins: [process.env.TRUSTED_ORIGIN || "http://localhost:5000"],
+//   advanced: {
+//     disableCSRFCheck: true,
+//   },
 });

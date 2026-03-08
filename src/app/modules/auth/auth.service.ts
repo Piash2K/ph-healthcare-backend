@@ -1,5 +1,6 @@
 import { UserStatus } from "../../../generated/prisma/enums";
 import { auth } from "../../lib/auth";
+import { prisma } from "../../lib/prisma";
 
 interface IRegister {
   name: string;
@@ -23,8 +24,20 @@ const registerPatient = async (payload: IRegister) => {
   if (!data.user) {
     throw new Error("Failed to register user");
   }
-  //  const patient= await prisma.$transaction(async (tx) =>
-  return data;
+  const patient = await prisma.$transaction(async (tx) => {
+    const patientTx = await tx.patient.create({
+      data: {
+        userId: data.user.id,
+        name: payload.name,
+        email: payload.email,
+      },
+    });
+    return patientTx;
+  });
+  return {
+    ...data,
+    patient,
+  };
 };
 
 const loginUser = async (payload: ILogin) => {
@@ -35,10 +48,10 @@ const loginUser = async (payload: ILogin) => {
       password,
     },
   });
-  if (data.user.status===UserStatus.BLOCKED) {
+  if (data.user.status === UserStatus.BLOCKED) {
     throw new Error("Your account is blocked. Please contact support.");
   }
-  if(data.user.isDeleted||data.user.status===UserStatus.DELETED){
+  if (data.user.isDeleted || data.user.status === UserStatus.DELETED) {
     throw new Error("Your account is deleted. Please contact support.");
   }
   return data.user;
@@ -46,5 +59,5 @@ const loginUser = async (payload: ILogin) => {
 
 export const AuthService = {
   registerPatient,
-  loginUser,    
+  loginUser,
 };

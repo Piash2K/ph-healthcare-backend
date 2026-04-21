@@ -11,7 +11,7 @@ enum UserStatus {
   DELETED
 }
 
-enum Gender{
+enum Gender {
   MALE
   FEMALE
 }

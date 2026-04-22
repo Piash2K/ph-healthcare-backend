@@ -3,6 +3,7 @@ import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../errorHelpers/AppError";
 import status from "http-status";
+import { TokenUtils } from "../../utils/token";
 
 interface IRegister {
   name: string;
@@ -62,12 +63,42 @@ const loginUser = async (payload: ILogin) => {
     },
   });
   if (data.user.status === UserStatus.BLOCKED) {
-    throw new AppError(status.FORBIDDEN, "Your account is blocked. Please contact support.");
+    throw new AppError(
+      status.FORBIDDEN,
+      "Your account is blocked. Please contact support.",
+    );
   }
   if (data.user.isDeleted || data.user.status === UserStatus.DELETED) {
-    throw new AppError(status.NOT_FOUND, "Your account is deleted. Please contact support.");
+    throw new AppError(
+      status.NOT_FOUND,
+      "Your account is deleted. Please contact support.",
+    );
   }
-  return data.user;
+
+  const accessToken = TokenUtils.getAccessToken({
+    userId: data.user.id,
+    email: data.user.email,
+    name: data.user.name,
+    role: data.user.role,
+    status: data.user.status,
+    isDeleted: data.user.isDeleted,
+    emailVerified: data.user.emailVerified,
+  });
+  const refreshToken = TokenUtils.getRefreshToken({
+    userId: data.user.id,
+    email: data.user.email,
+    name: data.user.name,
+    role: data.user.role,
+    status: data.user.status,
+    isDeleted: data.user.isDeleted,
+    emailVerified: data.user.emailVerified,
+  });
+
+  return {
+    ...data,
+    accessToken,
+    refreshToken,
+  };
 };
 
 export const AuthService = {

@@ -39,9 +39,30 @@ const registerPatient = async (payload: IRegister) => {
       });
       return patientTx;
     });
+    const accessToken = TokenUtils.getAccessToken({
+    userId: data.user.id,
+    email: data.user.email,
+    name: data.user.name,
+    role: data.user.role,
+    status: data.user.status,
+    isDeleted: data.user.isDeleted,
+    emailVerified: data.user.emailVerified,
+  });
+  const refreshToken = TokenUtils.getRefreshToken({
+    userId: data.user.id,
+    email: data.user.email,
+    name: data.user.name,
+    role: data.user.role,
+    status: data.user.status,
+    isDeleted: data.user.isDeleted,
+    emailVerified: data.user.emailVerified,
+  });
     return {
       ...data,
       patient,
+      accessToken,
+      refreshToken,
+
     };
   } catch (error) {
     console.log("Transaction error:", error);

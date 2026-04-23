@@ -28,32 +28,29 @@ const setAccessTokenCookie = (res: Response, token: string) => {
     secure: true,
     sameSite: "none",
     path: "/",
-    maxAge: 60 * 60 * 60*24
+    maxAge: 60 * 60 * 60 * 24,
   });
 };
 
 const setRefreshTokenCookie = (res: Response, token: string) => {
-
-  CookieUtils.setCookie(res, "refreshToken", token, { 
+  CookieUtils.setCookie(res, "refreshToken", token, {
     httpOnly: true,
     secure: true,
-    sameSite: "none", 
+    sameSite: "none",
     path: "/",
-    maxAge: 60 * 60 * 60*24 * 7,
+    maxAge: 60 * 60 * 60 * 24 * 7,
   });
-}
+};
 
-const setBetterAuthSessionCookies = (res: Response, token: string  ) => {
-
-  CookieUtils.setCookie(res, "bette-auth.session_token", token, {
+const setBetterAuthSessionCookies = (res: Response, token: string) => {
+  CookieUtils.setCookie(res, "better-auth.session_token", token, {
     httpOnly: true,
     secure: true,
-    sameSite: "none", 
+    sameSite: "none",
     path: "/",
-    maxAge: 60 * 60 * 60*24
+    maxAge: 60 * 60 * 60 * 24,
   });
-}
-
+};
 
 export const TokenUtils = {
   getAccessToken,

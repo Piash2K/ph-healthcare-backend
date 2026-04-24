@@ -18,6 +18,7 @@ model User {
 
   @@unique([email])
   @@map("user")
+  admins Admin[]
 }
 
 model Session {

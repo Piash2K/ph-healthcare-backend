@@ -53,15 +53,28 @@ export const checkAuth =
             user.status === UserStatus.BLOCKED ||
             user.status === UserStatus.DELETED
           ) {
-            throw new  AppError(status.UNAUTHORIZED, "Forbidden: Your account is blocked or deleted");
+            throw new AppError(
+              status.UNAUTHORIZED,
+              "Forbidden: Your account is blocked or deleted",
+            );
           }
           if (user.isDeleted) {
-            throw new  AppError(status.UNAUTHORIZED, "Forbidden: Your account is deleted");
+            throw new AppError(
+              status.UNAUTHORIZED,
+              "Forbidden: Your account is deleted",
+            );
           }
-          if(authRoles.length > 0 && !authRoles.includes(user.role)){
-            throw new  AppError(status.FORBIDDEN, "Forbidden: You do not have permission to access this resource");
+          if (authRoles.length > 0 && !authRoles.includes(user.role)) {
+            throw new AppError(
+              status.FORBIDDEN,
+              "Forbidden: You do not have permission to access this resource",
+            );
           }
-          
+          req.user = {
+            userId: user.id,
+            role: user.role,
+            email: user.email,
+          };
         }
 
         const accessToken = CookieUtils.getCookie(req, "accessToken");
@@ -71,24 +84,28 @@ export const checkAuth =
             "Unauthorized: Access token is missing",
           );
         }
-        
-
       }
-       const accessToken = CookieUtils.getCookie(req, "accessToken");
+      const accessToken = CookieUtils.getCookie(req, "accessToken");
       if (!accessToken) {
         throw new AppError(
           status.UNAUTHORIZED,
           "Unauthorized: Access token is missing",
         );
       }
-      const verifiedToken= JwtUtils.verifyToken(accessToken,envVars.ACCESS_TOKEN_SECRET);
+      const verifiedToken = JwtUtils.verifyToken(
+        accessToken,
+        envVars.ACCESS_TOKEN_SECRET,
+      );
       if (!verifiedToken) {
         throw new AppError(
           status.UNAUTHORIZED,
           "Unauthorized: Invalid access token",
         );
       }
-      if (authRoles.length > 0 && !authRoles.includes(verifiedToken.data!.role as Role)) {
+      if (
+        authRoles.length > 0 &&
+        !authRoles.includes(verifiedToken.data!.role as Role)
+      ) {
         throw new AppError(
           status.FORBIDDEN,
           "Forbidden: You do not have permission to access this resource",

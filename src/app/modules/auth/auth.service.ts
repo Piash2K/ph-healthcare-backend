@@ -4,6 +4,7 @@ import { prisma } from "../../lib/prisma";
 import AppError from "../../errorHelpers/AppError";
 import status from "http-status";
 import { TokenUtils } from "../../utils/token";
+import { IRequestUser } from "../../interfaces/requestUser.interface";
 
 interface IRegister {
   name: string;
@@ -40,29 +41,28 @@ const registerPatient = async (payload: IRegister) => {
       return patientTx;
     });
     const accessToken = TokenUtils.getAccessToken({
-    userId: data.user.id,
-    email: data.user.email,
-    name: data.user.name,
-    role: data.user.role,
-    status: data.user.status,
-    isDeleted: data.user.isDeleted,
-    emailVerified: data.user.emailVerified,
-  });
-  const refreshToken = TokenUtils.getRefreshToken({
-    userId: data.user.id,
-    email: data.user.email,
-    name: data.user.name,
-    role: data.user.role,
-    status: data.user.status,
-    isDeleted: data.user.isDeleted,
-    emailVerified: data.user.emailVerified,
-  });
+      userId: data.user.id,
+      email: data.user.email,
+      name: data.user.name,
+      role: data.user.role,
+      status: data.user.status,
+      isDeleted: data.user.isDeleted,
+      emailVerified: data.user.emailVerified,
+    });
+    const refreshToken = TokenUtils.getRefreshToken({
+      userId: data.user.id,
+      email: data.user.email,
+      name: data.user.name,
+      role: data.user.role,
+      status: data.user.status,
+      isDeleted: data.user.isDeleted,
+      emailVerified: data.user.emailVerified,
+    });
     return {
       ...data,
       patient,
       accessToken,
       refreshToken,
-
     };
   } catch (error) {
     console.log("Transaction error:", error);
@@ -122,7 +122,40 @@ const loginUser = async (payload: ILogin) => {
   };
 };
 
+const getMe = async (user: IRequestUser) => {
+  console.log(user);
+  const isUserExists = await prisma.user.findUnique({
+    where: {
+      id: user.userId,
+    },
+    include: {
+      patient: {
+        include: {
+          appointments: true,
+          reviews: true,
+          prescriptions: true,
+          medicalReports: true,
+          patientHealthData: true,
+        },
+      },
+      doctor: {
+        include: {
+          specialties: true,
+          appointments: true,
+          reviews: true,
+          prescriptions: true,
+        },
+      },
+      admins: true,
+    },
+  });
+  if (!isUserExists) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+  return isUserExists;
+};
 export const AuthService = {
   registerPatient,
   loginUser,
+  getMe,
 };

@@ -4,6 +4,7 @@ import { AuthService } from "./auth.service";
 import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 import { TokenUtils } from "../../utils/token";
+import AppError from "../../errorHelpers/AppError";
 
 const registerPatient = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
@@ -54,8 +55,35 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getNewToken = catchAsync(async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken;
+  const betterAuthSessionToken = req.cookies["better-auth.session_token"];
+  if (!refreshToken) {
+    throw new AppError(status.BAD_REQUEST, "Refresh token is required");
+  }
+
+  const result = await AuthService.getNewToken(refreshToken, betterAuthSessionToken);
+  const { accessToken, refreshToken: newRefreshToken, sessionToken } = result;
+
+  TokenUtils.setAccessTokenCookie(res, accessToken);
+  TokenUtils.setRefreshTokenCookie(res, newRefreshToken);
+  TokenUtils.setBetterAuthSessionCookies(res, sessionToken);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "New access token and refresh token generated successfully",
+    data: {
+      accessToken,
+      refreshToken: newRefreshToken,
+      sessionToken,
+    },
+  });
+});
+
 export const AuthController = {
   registerPatient,
   loginUser,
   getMe,
+  getNewToken,
 };

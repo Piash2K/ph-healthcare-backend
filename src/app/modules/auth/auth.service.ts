@@ -234,7 +234,29 @@ const changePassword = async (
       Authorization: `Bearer ${sessionToken}`,
     }),
   });
-  return result;
+  const accessToken = TokenUtils.getAccessToken({
+    userId: session.user.id,
+    email: session.user.email,
+    name: session.user.name,
+    role: session.user.role,
+    status: session.user.status,
+    isDeleted: session.user.isDeleted,
+    emailVerified: session.user.emailVerified,
+  });
+  const refreshToken = TokenUtils.getRefreshToken({
+    userId: session.user.id,
+    email: session.user.email,
+    name: session.user.name,
+    role: session.user.role,
+    status: session.user.status,
+    isDeleted: session.user.isDeleted,
+    emailVerified: session.user.emailVerified,
+  });
+  return {
+    ...result,
+    accessToken,
+    refreshToken,
+  };
 };
 
 export const AuthService = {

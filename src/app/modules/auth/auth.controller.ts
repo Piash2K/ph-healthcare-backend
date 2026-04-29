@@ -18,10 +18,7 @@ const registerPatient = catchAsync(async (req: Request, res: Response) => {
     httpStatusCode: status.CREATED,
     success: true,
     message: "Patient registered successfully",
-    data: { token,
-      accessToken,
-      refreshToken,
-      ...rest },
+    data: { token, accessToken, refreshToken, ...rest },
   });
 });
 
@@ -37,10 +34,7 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     httpStatusCode: status.OK,
     success: true,
     message: "User logged in successfully",
-    data: { token,
-      accessToken,
-      refreshToken,
-      ...rest },
+    data: { token, accessToken, refreshToken, ...rest },
   });
 });
 
@@ -62,7 +56,10 @@ const getNewToken = catchAsync(async (req: Request, res: Response) => {
     throw new AppError(status.BAD_REQUEST, "Refresh token is required");
   }
 
-  const result = await AuthService.getNewToken(refreshToken, betterAuthSessionToken);
+  const result = await AuthService.getNewToken(
+    refreshToken,
+    betterAuthSessionToken,
+  );
   const { accessToken, refreshToken: newRefreshToken, sessionToken } = result;
 
   TokenUtils.setAccessTokenCookie(res, accessToken);
@@ -81,9 +78,24 @@ const getNewToken = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+  const payload = req.body;
+  const betterAuthSessionToken = req.cookies["better-auth.session_token"];
+
+  const result = await AuthService.changePassword(payload, betterAuthSessionToken);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Password changed successfully",
+    data: result,
+  });
+});
+
 export const AuthController = {
   registerPatient,
   loginUser,
   getMe,
   getNewToken,
+  changePassword
 };
